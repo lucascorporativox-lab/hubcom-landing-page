@@ -6,7 +6,7 @@ const services = [
     number: "01",
     title: "Painel de Incidentes",
     subtitle: "Zabbix Integration",
-    description: "Centralize todos os alertas e incidentes da sua infraestrutura em um painel unificado com classificação por severidade, histórico detalhado e resolução guiada em tempo real.",
+    description: "Centralize todos os alertas e incidentes da sua infraestrutura em um painel unificado com classificação por severidade, histórico detalhado e resolução guiada em tempo real. Integra com Zabbix através de palavras-chave nos comentários de acesso, direcionando automaticamente para o card específico do incidente.",
     features: [
       "KPIs ao vivo: críticos, alertas, info e OK",
       "Distribuição por severidade com barras de proporção",
@@ -307,40 +307,92 @@ function App() {
         }
         .services-grid {
           display: grid;
-          grid-template-columns: 1fr;
+          grid-template-columns: repeat(2, 1fr);
           gap: 32px;
           position: relative;
           z-index: 1;
           width: 100%;
-          max-width: 800px;
-          margin: 0 auto;
         }
         .service-card {
-          background: rgba(255,255,255,0.03);
-          border: 1px solid rgba(255,255,255,0.1);
-          padding: 40px;
-          border-radius: 20px;
-          transition: all 0.3s;
+          background: linear-gradient(135deg, rgba(99,102,241,0.1) 0%, rgba(139,92,246,0.05) 100%);
+          border: 1px solid rgba(99,102,241,0.3);
+          padding: 0;
+          border-radius: 24px;
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          overflow: hidden;
+          position: relative;
         }
-        .service-card:hover { border-color: rgba(99,102,241,0.3); }
+        .service-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 4px;
+          background: linear-gradient(90deg, #6366F1, #8B5CF6, #EC4899);
+        }
+        .service-card:hover {
+          transform: translateY(-8px);
+          border-color: rgba(99,102,241,0.6);
+          box-shadow: 0 20px 40px rgba(99,102,241,0.2);
+        }
+        .service-card-content {
+          padding: 40px;
+        }
+        .service-card-header {
+          display: flex;
+          align-items: flex-start;
+          gap: 24px;
+          margin-bottom: 24px;
+        }
         .service-number {
-          width: 48px;
-          height: 48px;
+          width: 64px;
+          height: 64px;
           background: linear-gradient(135deg, #6366F1, #8B5CF6);
-          border-radius: 12px;
+          border-radius: 16px;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 20px;
+          font-size: 24px;
           font-weight: 800;
           color: white;
-          margin-bottom: 20px;
+          flex-shrink: 0;
+          box-shadow: 0 8px 20px rgba(99,102,241,0.3);
         }
-        .service-card h3 { font-size: 22px; font-weight: 700; color: white; margin-bottom: 12px; }
-        .service-card p { font-size: 15px; color: rgba(255,255,255,0.6); margin-bottom: 24px; line-height: 1.6; }
-        .service-card ul { list-style: none; margin-bottom: 24px; }
-        .service-card li { display: flex; gap: 10px; padding: 8px 0; font-size: 14px; color: rgba(255,255,255,0.7); }
-        .service-card li::before { content: '✓'; color: #6366F1; font-weight: 700; }
+        .service-card-title {
+          flex: 1;
+        }
+        .service-card h3 { font-size: 24px; font-weight: 800; color: white; margin-bottom: 8px; }
+        .service-card-subtitle {
+          font-size: 13px;
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+          color: #6366F1;
+          font-weight: 600;
+        }
+        .service-card p { font-size: 16px; color: rgba(255,255,255,0.7); margin-bottom: 32px; line-height: 1.7; }
+        .service-card ul { list-style: none; margin-bottom: 32px; }
+        .service-card li {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 12px 16px;
+          font-size: 15px;
+          color: rgba(255,255,255,0.8);
+          background: rgba(255,255,255,0.03);
+          border-radius: 12px;
+          margin-bottom: 8px;
+          transition: all 0.2s;
+        }
+        .service-card li:hover {
+          background: rgba(99,102,241,0.1);
+        }
+        .service-card li::before {
+          content: '✓';
+          color: #6366F1;
+          font-weight: 700;
+          font-size: 18px;
+        }
 
         /* CTA */
         .cta-section {
@@ -514,17 +566,24 @@ function App() {
           <div className="services-grid">
             {services.map((s) => (
               <div key={s.id} className="service-card">
-                <div className="service-number">{s.number}</div>
-                <h3>{s.title}</h3>
-                <p>{s.description}</p>
-                <ul>
-                  {s.features.map((f, j) => <li key={j}>{f}</li>)}
-                </ul>
-                {s.image && (
-                  <div style={{ borderRadius: 12, overflow: "hidden", border: "1px solid rgba(255,255,255,0.1)" }}>
-                    <img src={s.image} alt={s.title} style={{ width: "100%", height: "auto", display: "block" }} />
+                <div className="service-card-content">
+                  <div className="service-card-header">
+                    <div className="service-number">{s.number}</div>
+                    <div className="service-card-title">
+                      <div className="service-card-subtitle">{s.subtitle}</div>
+                      <h3>{s.title}</h3>
+                    </div>
                   </div>
-                )}
+                  <p>{s.description}</p>
+                  <ul>
+                    {s.features.map((f, j) => <li key={j}>{f}</li>)}
+                  </ul>
+                  {s.image && (
+                    <div style={{ borderRadius: 12, overflow: "hidden", border: "1px solid rgba(255,255,255,0.1)", marginTop: "24px" }}>
+                      <img src={s.image} alt={s.title} style={{ width: "100%", height: "auto", display: "block" }} />
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>
